@@ -6,9 +6,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.hateoas.MediaTypes;
@@ -26,9 +29,11 @@ import java.time.LocalDateTime;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EventControllerTest {
     MockMvc mockMvc;
 
@@ -37,9 +42,6 @@ public class EventControllerTest {
 
     @Autowired
     WebApplicationContext applicationContext;
-
-    @MockBean
-    EventRepository repository;
 
     @BeforeEach
     public void setup() {
@@ -51,6 +53,7 @@ public class EventControllerTest {
     @Test
     public void createEvent() throws Exception {
         Event event = Event.builder()
+                .id(100)
                 .name("hh-jang")
                 .description("테스트 데이터")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
@@ -61,10 +64,10 @@ public class EventControllerTest {
                 .maxPrice(200)
                 .limitOfEnrollment(100)
                 .location("죽전역 근처")
+                .free(true)
+                .offline(false)
+                .eventStatus(EventStatus.PUBLISHED)
                 .build();
-        event.setId(10);
-        repository.save(event);
-        Mockito.when(repository.save(Mockito.any(Event.class))).thenReturn(event);
 
         mockMvc.perform(post("/api/events/")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -74,6 +77,10 @@ public class EventControllerTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/hal+json;charset=UTF-8"))
+                .andExpect(jsonPath("id").value(not(100)))
+                .andExpect(jsonPath("free").value(not(true)))
+                .andExpect(jsonPath("eventStatus").value(equalTo(EventStatus.DRAFT)))
+        ;
     }
 }
