@@ -2,6 +2,7 @@ package com.hhjang.restapidemo.events;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,8 @@ public class EventControllerTest {
     }
 
     @Test
+    // junit5에서 관련 기능 지원하는게 있으니 나중에 변경하기
+    @TestDescription("정상적으로 이벤트를 생성하는 코드")
     public void createEvent() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("hh-jang")
@@ -73,6 +76,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("입력받을 수 없는 값을 사용한 경우 400 에러가 발생하는 코드")
     public void createEvent_Bad_Request() throws Exception {
         Event event = Event.builder()
                 .id(100)
@@ -100,6 +104,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("입력값이 비어있는 경우 에러가 발생하는 테스트")
     public void createEvent_BadRequest_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().
                 build();
@@ -113,6 +118,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("입력값이 잘못되었을 경우 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto event = EventDto.builder()
                 .name("hh-jang")
