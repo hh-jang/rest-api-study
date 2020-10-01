@@ -20,10 +20,12 @@ public class EventController {
 
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
+    private final EventValidator validator;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator) {
         this.eventRepository = eventRepository;
         this.modelMapper = modelMapper;
+        this.validator = validator;
     }
 
     @PostMapping
@@ -31,6 +33,11 @@ public class EventController {
         if(errors.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
+        validator.validate(eventDto, errors);
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Event event = modelMapper.map(eventDto, Event.class);
         Event savedEvent = this.eventRepository.save(event);
         URI createdUri = linkTo(Event.class).slash(savedEvent.getId()).toUri();

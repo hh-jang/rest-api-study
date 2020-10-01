@@ -111,4 +111,27 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void createEvent_Bad_Request_Wrong_Input() throws Exception {
+        EventDto event = EventDto.builder()
+                .name("hh-jang")
+                .description("테스트 데이터")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
+                .beginEventDateTime(LocalDateTime.of(2020, 9, 24, 11, 11))
+                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .basePrice(10000)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("죽전역 근처")
+                .build();
+
+        mockMvc.perform(post("/api/events/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsBytes(event)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 }

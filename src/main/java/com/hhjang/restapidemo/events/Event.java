@@ -23,6 +23,6 @@ public class Event {
     private int limitOfEnrollment;
     private boolean offline;
     private boolean free;
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(value = EnumType.STRING) @Builder.Default
     private EventStatus eventStatus = EventStatus.DRAFT;
 }
