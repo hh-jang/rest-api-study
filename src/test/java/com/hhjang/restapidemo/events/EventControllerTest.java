@@ -138,6 +138,10 @@ public class EventControllerTest {
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(event)))
                 .andDo(print())
+                // TODO global 외에 field error 처리 추가
+                .andExpect(jsonPath("$[0].objectName").exists())
+                .andExpect(jsonPath("$[0].defaultMessage").exists())
+                .andExpect(jsonPath("$[0].code").exists())
                 .andExpect(status().isBadRequest());
     }
 }
