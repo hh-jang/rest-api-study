@@ -88,12 +88,14 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(document("create-event",     // Document 생성
                         links(
                                 // 링크 정보를 문서조각에 추가
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
-                                linkWithRel("update-event").description("link to update an existing event")
+                                linkWithRel("update-event").description("link to update an existing event"),
+                                linkWithRel("profile").description("link to profile an existing event")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -137,7 +139,8 @@ public class EventControllerTest {
                                 // optional -
                                 fieldWithPath("_links.self.href").description("self href of new event").optional(),
                                 fieldWithPath("_links.query-events.href").description("query events href of new event").optional(),
-                                fieldWithPath("_links.update-event.href").description("update event href of new event").optional()
+                                fieldWithPath("_links.update-event.href").description("update event href of new event").optional(),
+                                fieldWithPath("_links.profile.href").description("profile event href of new event").optional()
                         )
                 ))
         ;

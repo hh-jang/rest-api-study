@@ -2,6 +2,7 @@ package com.hhjang.restapidemo.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,8 @@ public class EventController {
         resource.add(linkTo(EventController.class).withRel("query-events"));
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
+        // TODO gradle 기반으로 구성하기
+        resource.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
     }
 }
