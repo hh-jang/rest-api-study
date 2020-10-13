@@ -1,5 +1,6 @@
 package com.hhjang.restapidemo.events;
 
+import com.hhjang.restapidemo.index.IndexController;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 import java.net.URI;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping(value = "/api/events/", produces = MediaTypes.HAL_JSON_VALUE)
@@ -34,11 +36,11 @@ public class EventController {
     @PostMapping
     public ResponseEntity create(@RequestBody @Valid EventDto eventDto, Errors errors) {
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return badRequest(errors);
         }
         validator.validate(eventDto, errors);
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return badRequest(errors);
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
@@ -55,5 +57,10 @@ public class EventController {
         // TODO gradle 기반으로 구성하기
         resource.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
+    }
+
+    private ResponseEntity badRequest(Errors errors) {
+        return ResponseEntity.badRequest().body(
+                EntityModel.of(errors, linkTo(methodOn(IndexController.class).index()).withRel("index")));
     }
 }
