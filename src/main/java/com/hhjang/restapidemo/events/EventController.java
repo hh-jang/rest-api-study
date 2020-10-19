@@ -2,13 +2,15 @@ package com.hhjang.restapidemo.events;
 
 import com.hhjang.restapidemo.index.IndexController;
 import org.modelmapper.ModelMapper;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,11 +28,13 @@ public class EventController {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
     private final EventValidator validator;
+    private final EventRepresentationModelAssembler assembler;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator, EventRepresentationModelAssembler assembler) {
         this.eventRepository = eventRepository;
         this.modelMapper = modelMapper;
         this.validator = validator;
+        this.assembler = assembler;
     }
 
     @PostMapping
@@ -57,6 +61,13 @@ public class EventController {
         // TODO gradle 기반으로 구성하기
         resource.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
+    }
+
+    @GetMapping
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> resourcesAssembler) {
+        Page<Event> page = this.eventRepository.findAll(pageable);
+        PagedModel<EventDto> eventDtos = resourcesAssembler.toModel(page, assembler);
+        return ResponseEntity.ok(eventDtos);
     }
 
     private ResponseEntity badRequest(Errors errors) {

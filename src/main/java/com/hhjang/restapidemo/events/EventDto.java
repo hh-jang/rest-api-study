@@ -1,17 +1,15 @@
 package com.hhjang.restapidemo.events;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.hateoas.EntityModel;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
-public class EventDto {
+@Data @Builder @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode(callSuper=false)
+public class EventDto extends EntityModel<Event> {
     @NotEmpty
     private String name;
     @NotEmpty
