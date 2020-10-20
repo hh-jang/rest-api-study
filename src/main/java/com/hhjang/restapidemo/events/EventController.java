@@ -28,13 +28,11 @@ public class EventController {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
     private final EventValidator validator;
-    private final EventRepresentationModelAssembler assembler;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator, EventRepresentationModelAssembler assembler) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator) {
         this.eventRepository = eventRepository;
         this.modelMapper = modelMapper;
         this.validator = validator;
-        this.assembler = assembler;
     }
 
     @PostMapping
@@ -66,8 +64,8 @@ public class EventController {
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> resourcesAssembler) {
         Page<Event> page = this.eventRepository.findAll(pageable);
-        PagedModel<EventDto> eventDtos = resourcesAssembler.toModel(page, assembler);
-        return ResponseEntity.ok(eventDtos);
+        PagedModel<EntityModel<Event>> entityModels = resourcesAssembler.toModel(page);
+        return ResponseEntity.ok(entityModels);
     }
 
     private ResponseEntity badRequest(Errors errors) {
