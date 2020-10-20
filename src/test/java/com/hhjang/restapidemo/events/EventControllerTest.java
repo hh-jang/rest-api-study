@@ -239,14 +239,51 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-events"))
+        // TODO Add Document Description
         ;
     }
 
-    private void generateEvent(int i) {
+    private Event generateEvent(int i) {
         Event event = Event.builder()
                 .name("event " + i)
                 .description("test event")
                 .build();
-        this.repository.save(event);
+        return repository.save(event);
+    }
+
+    @Test
+    @TestDescription("이벤트 1개를 조회한다")
+    public void getEvent() throws Exception{
+        // Given
+        Event event = this.generateEvent(100);
+
+        // When & then
+        this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("name").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+        // TODO Add Document
+        ;
+    }
+
+    @Test
+    @TestDescription("존재하지 않는 이벤트 조회 시 404 응답")
+    public void getEventNotFound() throws Exception{
+        // Given
+        int notExistId = 123123;
+
+        // When & then
+        this.mockMvc.perform(get("/api/events/{id}", String.valueOf(notExistId)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+        // TODO Add Document
+        ;
     }
 }
