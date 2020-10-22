@@ -2,19 +2,14 @@ package com.hhjang.restapidemo.events;
 
 import lombok.*;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EventDto extends RepresentationModel<EventDto> {
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class EventDto {
     @NotEmpty
     private String name;
     @NotEmpty

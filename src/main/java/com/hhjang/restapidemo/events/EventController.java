@@ -10,13 +10,11 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -28,13 +26,11 @@ public class EventController {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
     private final EventValidator validator;
-    private final EventRepresentationModelAssembler assembler;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator, EventRepresentationModelAssembler assembler) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator) {
         this.eventRepository = eventRepository;
         this.modelMapper = modelMapper;
         this.validator = validator;
-        this.assembler = assembler;
     }
 
     @PostMapping
@@ -59,15 +55,27 @@ public class EventController {
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
         // TODO gradle 기반으로 구성하기
-        resource.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
+        resource.add(Link.of("docs/index.html#resources-events-list").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
     }
 
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> resourcesAssembler) {
         Page<Event> page = this.eventRepository.findAll(pageable);
-        PagedModel<EventDto> eventDtos = resourcesAssembler.toModel(page, assembler);
-        return ResponseEntity.ok(eventDtos);
+        PagedModel<EntityModel<Event>> entityModels = resourcesAssembler.toModel(page, entity -> EventEntityModel.of(entity));
+        entityModels.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
+        return ResponseEntity.ok(entityModels);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity getEvents(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = eventRepository.findById(id);
+        if(optionalEvent.isEmpty()) return ResponseEntity.notFound().build();
+
+        Event event = optionalEvent.get();
+        return ResponseEntity.ok(EventEntityModel.of(
+                event,
+                Link.of("docs/index.html#resources-events-get").withRel("profile")));
     }
 
     private ResponseEntity badRequest(Errors errors) {
