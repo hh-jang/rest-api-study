@@ -44,7 +44,7 @@ public class EventController {
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
-        event.update();
+        event.statusUpdate();
         Event savedEvent = this.eventRepository.save(event);
 
         WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(savedEvent.getId());
@@ -81,5 +81,31 @@ public class EventController {
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(
                 EntityModel.of(errors, linkTo(methodOn(IndexController.class).index()).withRel("index")));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity update(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
+        if(errors.hasErrors()) {
+            return badRequest(errors);
+        }
+        validator.validate(eventDto, errors);
+        if(errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        Event savedEvent = this.eventRepository.findById(id).get();
+        savedEvent.update(eventDto);
+        Event updatedEvent = this.eventRepository.save(savedEvent);
+
+        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(updatedEvent.getId());
+        URI createdUri = linkBuilder.toUri();
+
+        EntityModel<Event> resource = EntityModel.of(updatedEvent);
+        resource.add(linkTo(EventController.class).withRel("query-events"));
+        resource.add(linkBuilder.withSelfRel());
+        resource.add(linkBuilder.withRel("update-event"));
+        // TODO gradle 기반으로 구성하기
+        resource.add(Link.of("docs/index.html#resources-events-list").withRel("profile"));
+        return ResponseEntity.created(createdUri).body(resource);
     }
 }

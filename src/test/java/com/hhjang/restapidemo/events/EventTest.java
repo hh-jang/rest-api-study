@@ -46,7 +46,7 @@ public class EventTest {
                 .build();
 
         // When
-        event.update();
+        event.statusUpdate();
 
         // Then
         assertThat(event.isFree()).isEqualTo(isFree);
@@ -61,7 +61,7 @@ public class EventTest {
                 .build();
 
         // When
-        event.update();
+        event.statusUpdate();
 
         // Then
         assertThat(event.isOffline()).isEqualTo(isOffline);

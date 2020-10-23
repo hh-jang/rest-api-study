@@ -26,7 +26,7 @@ public class Event {
     @Enumerated(value = EnumType.STRING) @Builder.Default
     private EventStatus eventStatus = EventStatus.DRAFT;
 
-    public void update() {
+    public void statusUpdate() {
         // Update free
         if (this.basePrice == 0 && this.maxPrice == 0) {
             this.free = true;
@@ -39,5 +39,21 @@ public class Event {
         } else {
             this.offline = true;
         }
+    }
+
+    public Event update(EventDto dto) {
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.beginEnrollmentDateTime = dto.getBeginEnrollmentDateTime();
+        this.closeEnrollmentDateTime = dto.getCloseEnrollmentDateTime();
+        this.beginEventDateTime = dto.getBeginEventDateTime();
+        this.closeEventDateTime = dto.getCloseEventDateTime();
+        this.basePrice = dto.getBasePrice();
+        this.maxPrice = dto.getMaxPrice();
+        this.limitOfEnrollment = dto.getLimitOfEnrollment();
+        this.location = dto.getLocation();
+
+        statusUpdate();
+        return this;
     }
 }

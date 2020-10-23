@@ -6,6 +6,7 @@ import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,8 +34,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,6 +48,9 @@ public class EventControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Autowired
     EventRepository repository;
@@ -195,10 +198,17 @@ public class EventControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    // 수정 테스트
+    // 1. 존재하는 이벤트를 수정 성공
+    // 2. 존재하는 이벤트를 수정 실패(not valid)
+    // 3. 존재하지 않는 이벤트 수정 에러
     @Test
     @TestDescription("입력값이 잘못되었을 경우 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
-        EventDto event = EventDto.builder()
+        // 성공할 수 있는 Event를 save한다
+        // 이벤트 수정을 요청한다. add valid
+        // 이벤트 수정한 내역을 증명한다.
+        EventDto eventD = EventDto.builder()
                 .name("hh-jang")
                 .description("테스트 데이터")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
@@ -211,17 +221,9 @@ public class EventControllerTest {
                 .location("죽전역 근처")
                 .build();
 
-        mockMvc.perform(post("/api/events/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsBytes(event)))
-                .andDo(print())
-                // TODO global 외에 field error 처리 추가
-                .andExpect(jsonPath("content[0].objectName").exists())
-                .andExpect(jsonPath("content[0].defaultMessage").exists())
-                .andExpect(jsonPath("content[0].code").exists())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("_links.index").exists());
+        repository.save(modelMapper.map(eventD, Event.class));
+
+
     }
 
     @Test
@@ -284,6 +286,53 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
         // TODO Add Document
+        ;
+    }
+
+    @Test
+    @TestDescription("이벤트가 존재할 때에 수정을 성공하는 테스트")
+    public void modifyEvent() throws Exception {
+        EventDto eventDto = EventDto.builder()
+                .name("hh-jang")
+                .description("테스트 데이터")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
+                .beginEventDateTime(LocalDateTime.of(2020, 9, 20, 11, 11))
+                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("죽전역 근처")
+                .build();
+
+        Event map = modelMapper.map(eventDto, Event.class);
+        map.statusUpdate();
+        Event savedEvent = repository.save(map);
+
+        savedEvent.setName("modified hh-jang");
+        savedEvent.setDescription("modified 테스트 데이터");
+        savedEvent.setLocation("modified 죽전역 근처");
+
+        EventDto modifiedDto = modelMapper.map(savedEvent, EventDto.class);
+
+        mockMvc.perform(put("/api/events/{id}", savedEvent.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsBytes(modifiedDto)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/hal+json;charset=UTF-8"))
+                .andExpect(jsonPath("id").value(savedEvent.getId()))
+                .andExpect(jsonPath("name").value("modified hh-jang"))
+                .andExpect(jsonPath("description").value("modified 테스트 데이터"))
+                .andExpect(jsonPath("location").value("modified 죽전역 근처"))
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+                .andExpect(jsonPath("_links.profile").exists())
         ;
     }
 }
