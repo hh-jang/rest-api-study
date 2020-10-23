@@ -2,21 +2,15 @@ package com.hhjang.restapidemo.events;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hhjang.restapidemo.MockMvcTest;
 import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,12 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith({SpringExtension.class, RestDocumentationExtension.class})
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@ActiveProfiles("test")
-public class EventControllerTest {
+public class EventControllerTest extends MockMvcTest {
     MockMvc mockMvc;
 
     @Autowired
@@ -81,9 +70,9 @@ public class EventControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsBytes(eventDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsBytes(eventDto)))
                 .andDo(print())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(status().isCreated())
@@ -226,16 +215,16 @@ public class EventControllerTest {
 
     @Test
     @TestDescription("30개의 이벤트를 10개씩 2번째 페이지 조회하기")
-    public void getEvents() throws Exception{
+    public void getEvents() throws Exception {
         // Given
         IntStream.range(0, 30).forEach(this::generateEvent);
 
         // When
         mockMvc.perform(get("/api/events/")
-                    .param("page", "1")
-                    .param("size", "10")
-                    .param("sort", "name,DESC")
-                )
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "name,DESC")
+        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
@@ -257,7 +246,7 @@ public class EventControllerTest {
 
     @Test
     @TestDescription("이벤트 1개를 조회한다")
-    public void getEvent() throws Exception{
+    public void getEvent() throws Exception {
         // Given
         Event event = this.generateEvent(100);
 
@@ -275,7 +264,7 @@ public class EventControllerTest {
 
     @Test
     @TestDescription("존재하지 않는 이벤트 조회 시 404 응답")
-    public void getEventNotFound() throws Exception{
+    public void getEventNotFound() throws Exception {
         // Given
         int notExistId = 123123;
 
