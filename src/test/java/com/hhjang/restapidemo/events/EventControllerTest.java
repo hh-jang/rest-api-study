@@ -243,6 +243,17 @@ public class EventControllerTest extends MockMvcTest {
         Event event = Event.builder()
                 .name("event " + i)
                 .description("test event")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
+                .beginEventDateTime(LocalDateTime.of(2020, 9, 20, 11, 11))
+                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("죽전역 근처")
+                .free(false)
+                .offline(true)
+                .eventStatus(EventStatus.DRAFT)
                 .build();
         return repository.save(event);
     }
@@ -281,37 +292,21 @@ public class EventControllerTest extends MockMvcTest {
 
     // 수정 테스트
     // 1. 존재하는 이벤트를 수정 성공
-    // 2. 존재하는 이벤트를 수정 실패(not valid)
-    // 3. 존재하지 않는 이벤트 수정 에러
+    // 2. 존재하는 이벤트를 수정 시 값이 잘못된 실패(not valid)
+    // 3. 존재하는 이벤트를 수정 시 값이 비어있을 경우 실패
+    // 4. 존재하지 않는 이벤트 수정 에러
     @Test
     @TestDescription("이벤트가 존재할 때에 수정을 성공하는 테스트")
     public void updateEvent() throws Exception {
         // Given
-        EventDto eventDto = EventDto.builder()
-                .name("hh-jang")
-                .description("테스트 데이터")
-                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
-                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
-                .beginEventDateTime(LocalDateTime.of(2020, 9, 20, 11, 11))
-                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
-                .basePrice(100)
-                .maxPrice(200)
-                .limitOfEnrollment(100)
-                .location("죽전역 근처")
-                .build();
+        Event generatedEvent = generateEvent(1);
+        String modifiedName = "modified hh-jang";
 
-        Event map = modelMapper.map(eventDto, Event.class);
-        map.statusUpdate();
-        Event savedEvent = repository.save(map);
-
-        savedEvent.setName("modified hh-jang");
-        savedEvent.setDescription("modified 테스트 데이터");
-        savedEvent.setLocation("modified 죽전역 근처");
-
-        EventDto modifiedDto = modelMapper.map(savedEvent, EventDto.class);
+        EventDto modifiedDto = modelMapper.map(generatedEvent, EventDto.class);
+        modifiedDto.setName(modifiedName);
 
         // When & Then
-        mockMvc.perform(put("/api/events/{id}", savedEvent.getId())
+        mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
@@ -320,10 +315,8 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/hal+json;charset=UTF-8"))
-                .andExpect(jsonPath("id").value(savedEvent.getId()))
+                .andExpect(jsonPath("id").value(generatedEvent.getId()))
                 .andExpect(jsonPath("name").value("modified hh-jang"))
-                .andExpect(jsonPath("description").value("modified 테스트 데이터"))
-                .andExpect(jsonPath("location").value("modified 죽전역 근처"))
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
@@ -335,31 +328,34 @@ public class EventControllerTest extends MockMvcTest {
     @TestDescription("이벤트가 존재할때에 잘못된 수정 내용일 때에 badRequest")
     public void updateEvent_Bad_Request_Wrong_Input() throws Exception {
         // Given
-        EventDto eventDto = EventDto.builder()
-                .name("hh-jang")
-                .description("테스트 데이터")
-                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
-                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
-                .beginEventDateTime(LocalDateTime.of(2020, 9, 20, 11, 11))
-                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
-                .basePrice(100)
-                .maxPrice(200)
-                .limitOfEnrollment(100)
-                .location("죽전역 근처")
-                .build();
+        Event generatedEvent = generateEvent(1);
+        String modifiedName = "modified hh-jang";
 
-        Event map = modelMapper.map(eventDto, Event.class);
-        map.statusUpdate();
-        Event savedEvent = repository.save(map);
-
-        EventDto modifiedDto = modelMapper.map(savedEvent, EventDto.class);
+        EventDto modifiedDto = modelMapper.map(generatedEvent, EventDto.class);
         modifiedDto.setBeginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11));
         modifiedDto.setCloseEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11));
         modifiedDto.setBeginEventDateTime(LocalDateTime.of(2020, 9, 24, 11, 11));
         modifiedDto.setCloseEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11));
 
         // When & Then
-        mockMvc.perform(put("/api/events/{id}", savedEvent.getId())
+        mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsBytes(modifiedDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    @TestDescription("이벤트가 존재할때에 비어있는 값을 보낼 경우 badRequest")
+    public void updateEvent_Bad_Request_Empty_Input() throws Exception {
+        // Given
+        Event generatedEvent = generateEvent(1);
+        EventDto modifiedDto = EventDto.builder().build();
+
+        // When & Then
+        mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
@@ -373,18 +369,7 @@ public class EventControllerTest extends MockMvcTest {
     public void updateEvent_Not_Found() throws Exception {
         // Given
         int notExistId = 123123;
-        EventDto eventDto = EventDto.builder()
-                .name("hh-jang")
-                .description("테스트 데이터")
-                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
-                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
-                .beginEventDateTime(LocalDateTime.of(2020, 9, 20, 11, 11))
-                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
-                .basePrice(100)
-                .maxPrice(200)
-                .limitOfEnrollment(100)
-                .location("죽전역 근처")
-                .build();
+        EventDto eventDto = EventDto.builder().build();
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", notExistId)
