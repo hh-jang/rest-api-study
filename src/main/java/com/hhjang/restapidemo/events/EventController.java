@@ -93,7 +93,10 @@ public class EventController {
             return badRequest(errors);
         }
 
-        Event savedEvent = this.eventRepository.findById(id).get();
+        Optional<Event> eventOptional = this.eventRepository.findById(id);
+        if(eventOptional.isEmpty()) return ResponseEntity.notFound().build();
+        Event savedEvent = eventOptional.get();
+
         savedEvent.update(eventDto);
         Event updatedEvent = this.eventRepository.save(savedEvent);
 
