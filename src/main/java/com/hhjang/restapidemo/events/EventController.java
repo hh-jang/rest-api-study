@@ -85,6 +85,9 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity update(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
+        Optional<Event> eventOptional = this.eventRepository.findById(id);
+        if(eventOptional.isEmpty()) return ResponseEntity.notFound().build();
+
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
@@ -93,11 +96,8 @@ public class EventController {
             return badRequest(errors);
         }
 
-        Optional<Event> eventOptional = this.eventRepository.findById(id);
-        if(eventOptional.isEmpty()) return ResponseEntity.notFound().build();
         Event savedEvent = eventOptional.get();
-
-        savedEvent.update(eventDto);
+        this.modelMapper.map(eventDto, savedEvent);
         Event updatedEvent = this.eventRepository.save(savedEvent);
 
         WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(updatedEvent.getId());
@@ -108,7 +108,7 @@ public class EventController {
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
         // TODO gradle 기반으로 구성하기
-        resource.add(Link.of("docs/index.html#resources-events-list").withRel("profile"));
+        resource.add(Link.of("docs/index.html#resources-events-update").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
     }
 }
