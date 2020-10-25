@@ -1,6 +1,7 @@
 package com.hhjang.restapidemo.index;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hhjang.restapidemo.MockMvcTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith({SpringExtension.class, RestDocumentationExtension.class})
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@ActiveProfiles("test")
-public class IndexControllerTest {
-    MockMvc mockMvc;
-
+public class IndexControllerTest extends MockMvcTest {
     @Autowired
     ObjectMapper objectMapper;
 

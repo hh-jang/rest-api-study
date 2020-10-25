@@ -1,6 +1,7 @@
 package com.hhjang.restapidemo;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,6 +23,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @ActiveProfiles("test")
+@Disabled       // test ignore
 public class MockMvcTest {
     protected MockMvc mockMvc;
 

@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class EventControllerTest extends MockMvcTest {
-    MockMvc mockMvc;
 
     @Autowired
     ObjectMapper objectMapper;
