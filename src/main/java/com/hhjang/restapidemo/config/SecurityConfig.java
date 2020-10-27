@@ -4,6 +4,8 @@ import com.hhjang.restapidemo.accounts.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,12 +25,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     PasswordEncoder passwordEncoder;
 
     @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(accountService)
+                .passwordEncoder(passwordEncoder);
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .mvcMatchers("/docs/**")
-                    .anonymous()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-                    .anonymous()
-        ;
+        // 참고 https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/config/annotation/web/builders/HttpSecurity.html
+        http
+                .anonymous()
+                    .and()
+                .formLogin()
+                    .and()
+                .authorizeRequests()
+                    .antMatchers(HttpMethod.GET, "/api/**").authenticated()
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).anonymous()
+                    .anyRequest().authenticated()
+                ;
+
+//        http.authorizeRequests()
+//                .mvcMatchers("/docs/**")
+//                    .anonymous()
+//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+//                    .anonymous()
+//        ;
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -14,11 +15,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class AccountService implements UserDetailsService {
+
     private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
+
     public static final String ROLE_PREFIX = "ROLE_";
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Account saveAccount(Account account) {
+        account.setPassword(this.passwordEncoder.encode(account.getPassword()));
+        return accountRepository.save(account);
     }
 
     @Override
