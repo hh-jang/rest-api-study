@@ -41,7 +41,7 @@ public class AuthServerConfigTest extends MockMvcTest {
 
         this.mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(clientId, clientSecret))
-                    .param("usename", username)
+                    .param("username", username)
                     .param("password", password)
                     .param("grant_type", "password"))
                 .andDo(print())
