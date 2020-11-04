@@ -1,7 +1,7 @@
 plugins {
 	id 'org.springframework.boot' version '2.3.3.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-	id 'org.asciidoctor.convert' version '1.5.8'
+	id 'org.asciidoctor.convert' version '1.5.9.2'
 	id 'java'
 }
 
@@ -23,6 +23,8 @@ ext {
 	set('snippetsDir', file("build/generated-snippets"))
 }
 
+ext['spring-restdocs.version'] = '2.0.4.RELEASE'
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
@@ -32,13 +34,14 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'mysql:mysql-connector-java'
 	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
-	implementation group: 'org.springframework.restdocs', name: 'spring-restdocs-asciidoctor'
+	asciidoctor group: 'org.springframework.restdocs', name: 'spring-restdocs-asciidoctor'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation("org.assertj:assertj-core:3.17.2")
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 	testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.h2database:h2'
 }
@@ -51,4 +54,11 @@ test {
 asciidoctor {
 	inputs.dir snippetsDir
 	dependsOn test
+}
+
+bootJar {
+	dependsOn asciidoctor
+	from ("${asciidoctor.outputDir}/html5") {
+		into 'static/docs'
+	}
 }

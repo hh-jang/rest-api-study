@@ -138,7 +138,10 @@ public class EventControllerTest extends MockMvcTest {
                                 fieldWithPath("_links.self.href").description("self href of new event").optional(),
                                 fieldWithPath("_links.query-events.href").description("query events href of new event").optional(),
                                 fieldWithPath("_links.update-event.href").description("update event href of new event").optional(),
-                                fieldWithPath("_links.profile.href").description("profile event href of new event").optional()
+                                fieldWithPath("_links.profile.href").description("profile event href of new event").optional(),
+
+                                // manager 에 대한 로직이 아직 진행하지 않았으므로 임시로 optional 추가
+                                fieldWithPath("manager").description("manager of new event").optional()
                         )
                 ))
         ;
