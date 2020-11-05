@@ -34,6 +34,7 @@ public class MockMvcTest {
                 .apply(documentationConfiguration(provider).operationPreprocessors()
                         .withRequestDefaults(prettyPrint())
                         .withResponseDefaults(prettyPrint()))
+//                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
     }
 }

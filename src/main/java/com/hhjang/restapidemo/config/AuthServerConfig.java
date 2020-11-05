@@ -1,6 +1,7 @@
 package com.hhjang.restapidemo.config;
 
 import com.hhjang.restapidemo.accounts.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,39 +16,39 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @EnableAuthorizationServer
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final AccountService accountService;
-    private final TokenStore tokenStore;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-    public AuthServerConfig(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, AccountService accountService, TokenStore tokenStore) {
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.accountService = accountService;
-        this.tokenStore = tokenStore;
-    }
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    AccountService accountService;
+
+    @Autowired
+    TokenStore tokenStore;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security.passwordEncoder(passwordEncoder);      // client secret 인코딩
+        security.passwordEncoder(passwordEncoder);
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-//        clients.jdbc()            inmemory가 아닌 실제 db시
+        // clients.jdbc()            inmemory가 아닌 실제 db시
         clients.inMemory()
                 .withClient("clientIdTestValue")
                 .authorizedGrantTypes("password", "refresh_token")
                 .scopes("read", "write")
-                .secret(passwordEncoder.encode("clientSecretTestValue"))
+                .secret(this.passwordEncoder.encode("clientSecretTestValue"))
                 .accessTokenValiditySeconds(10 * 60)
-                .refreshTokenValiditySeconds(60 * 60);
+                .refreshTokenValiditySeconds(6 * 10 * 60);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.authenticationManager(authenticationManager)
-            .userDetailsService(accountService)
-            .tokenStore(tokenStore);
+                .userDetailsService(accountService)
+                .tokenStore(tokenStore);
     }
 }

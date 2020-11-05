@@ -3,6 +3,9 @@ package com.hhjang.restapidemo.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hhjang.restapidemo.MockMvcTest;
+import com.hhjang.restapidemo.accounts.Account;
+import com.hhjang.restapidemo.accounts.AccountRole;
+import com.hhjang.restapidemo.accounts.AccountService;
 import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +15,14 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.not;
@@ -28,6 +33,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,6 +48,9 @@ public class EventControllerTest extends MockMvcTest {
 
     @Autowired
     EventRepository repository;
+
+    @Autowired
+    AccountService accountService;
 
     // TODO need refactor common configure
     @BeforeEach
@@ -72,9 +81,10 @@ public class EventControllerTest extends MockMvcTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsBytes(eventDto)))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAuthToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsBytes(eventDto)))
                 .andDo(print())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(status().isCreated())
@@ -381,5 +391,31 @@ public class EventControllerTest extends MockMvcTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
         ;
+    }
+
+    public String getAuthToken() throws Exception {
+        String clientId = "clientIdTestValue";
+        String clientSecret = "clientSecretTestValue";
+        String username = "hhjang@gmail.com";
+        String password = "hhjang1";
+
+        Account account = Account.builder()
+                .email(username)
+                .password(password)
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
+
+        this.accountService.saveAccount(account);
+
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(clientId, clientSecret))
+                .param("username", username)
+                .param("password", password)
+                .param("grant_type", "password"))
+                .andDo(print());
+
+        String responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser jsonParser = new Jackson2JsonParser();
+        return jsonParser.parseMap(responseBody).get("access_token").toString();
     }
 }
