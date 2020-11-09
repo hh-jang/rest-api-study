@@ -4,6 +4,7 @@ package com.hhjang.restapidemo.events;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hhjang.restapidemo.MockMvcTest;
 import com.hhjang.restapidemo.accounts.Account;
+import com.hhjang.restapidemo.accounts.AccountRepository;
 import com.hhjang.restapidemo.accounts.AccountRole;
 import com.hhjang.restapidemo.accounts.AccountService;
 import com.hhjang.restapidemo.common.TestDescription;
@@ -14,12 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -30,8 +27,6 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,10 +42,19 @@ public class EventControllerTest extends MockMvcTest {
     ModelMapper modelMapper;
 
     @Autowired
-    EventRepository repository;
+    EventRepository eventRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
 
     @Autowired
     AccountService accountService;
+
+    @BeforeEach
+    public void setUp() {
+        this.accountRepository.deleteAll();
+        this.eventRepository.deleteAll();
+    }
 
     @Test
     // junit5에서 관련 기능 지원하는게 있으니 나중에 변경하기
@@ -70,7 +74,7 @@ public class EventControllerTest extends MockMvcTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + getAuthToken())
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaTypes.HAL_JSON)
                     .content(objectMapper.writeValueAsBytes(eventDto)))
@@ -146,6 +150,10 @@ public class EventControllerTest extends MockMvcTest {
         ;
     }
 
+    private String getBearerToken() throws Exception {
+        return "Bearer " + getAuthToken();
+    }
+
     @Test
     @TestDescription("입력받을 수 없는 값을 사용한 경우 400 에러가 발생하는 코드")
     public void createEvent_Bad_Request() throws Exception {
@@ -167,6 +175,7 @@ public class EventControllerTest extends MockMvcTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(event)))
@@ -181,6 +190,7 @@ public class EventControllerTest extends MockMvcTest {
                 build();
 
         mockMvc.perform(post("/api/events/")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(eventDto)))
@@ -205,6 +215,7 @@ public class EventControllerTest extends MockMvcTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(event)))
@@ -256,7 +267,7 @@ public class EventControllerTest extends MockMvcTest {
                 .offline(true)
                 .eventStatus(EventStatus.DRAFT)
                 .build();
-        return repository.save(event);
+        return eventRepository.save(event);
     }
 
     @Test
@@ -308,6 +319,7 @@ public class EventControllerTest extends MockMvcTest {
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
@@ -340,6 +352,7 @@ public class EventControllerTest extends MockMvcTest {
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
@@ -357,6 +370,7 @@ public class EventControllerTest extends MockMvcTest {
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
@@ -374,6 +388,7 @@ public class EventControllerTest extends MockMvcTest {
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", notExistId)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(eventDto)))
