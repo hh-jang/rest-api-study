@@ -52,17 +52,6 @@ public class EventControllerTest extends MockMvcTest {
     @Autowired
     AccountService accountService;
 
-    // TODO need refactor common configure
-    @BeforeEach
-    public void setup(WebApplicationContext applicationContext, RestDocumentationContextProvider provider) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext)
-                .addFilters(new CharacterEncodingFilter("UTF-8", true))
-                .apply(documentationConfiguration(provider).operationPreprocessors()
-                        .withRequestDefaults(prettyPrint())
-                        .withResponseDefaults(prettyPrint()))
-                .build();
-    }
-
     @Test
     // junit5에서 관련 기능 지원하는게 있으니 나중에 변경하기
     @TestDescription("정상적으로 이벤트를 생성하는 코드")
