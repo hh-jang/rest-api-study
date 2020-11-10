@@ -7,6 +7,7 @@ import com.hhjang.restapidemo.accounts.Account;
 import com.hhjang.restapidemo.accounts.AccountRepository;
 import com.hhjang.restapidemo.accounts.AccountRole;
 import com.hhjang.restapidemo.accounts.AccountService;
+import com.hhjang.restapidemo.common.AppProperties;
 import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ public class EventControllerTest extends MockMvcTest {
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    AppProperties appProperties;
 
     @BeforeEach
     public void setUp() {
@@ -398,23 +402,18 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     public String getAuthToken() throws Exception {
-        String clientId = "clientIdTestValue";
-        String clientSecret = "clientSecretTestValue";
-        String username = "hhjang@gmail.com";
-        String password = "hhjang1";
-
         Account account = Account.builder()
-                .email(username)
-                .password(password)
+                .email(appProperties.getGeneralUsername())
+                .password(appProperties.getGeneralUserPassword())
                 .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                 .build();
 
         this.accountService.saveAccount(account);
 
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .param("username", username)
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                .param("username", appProperties.getGeneralUsername())
+                .param("password", appProperties.getGeneralUserPassword())
                 .param("grant_type", "password"))
                 .andDo(print());
 
