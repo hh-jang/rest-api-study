@@ -240,6 +240,7 @@ public class EventControllerTest extends MockMvcTest {
 
         // When
         mockMvc.perform(get("/api/events/")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .param("page", "1")
                 .param("size", "10")
                 .param("sort", "name,DESC")
@@ -250,6 +251,7 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.create-event").exists())
                 .andDo(document("query-events"))
         // TODO Add Document Description
         ;
