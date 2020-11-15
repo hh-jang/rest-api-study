@@ -1,6 +1,8 @@
 package com.hhjang.restapidemo.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hhjang.restapidemo.accounts.Account;
+import com.hhjang.restapidemo.accounts.AccountSerializer;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,6 +29,7 @@ public class Event {
     @Enumerated(value = EnumType.STRING) @Builder.Default
     private EventStatus eventStatus = EventStatus.DRAFT;
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
 
     public void statusUpdate() {
