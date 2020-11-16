@@ -8,8 +8,8 @@ import com.hhjang.restapidemo.accounts.AccountRepository;
 import com.hhjang.restapidemo.accounts.AccountRole;
 import com.hhjang.restapidemo.accounts.AccountService;
 import com.hhjang.restapidemo.common.AppProperties;
-import com.hhjang.restapidemo.common.TestDescription;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +62,7 @@ public class EventControllerTest extends MockMvcTest {
 
     @Test
     // junit5에서 관련 기능 지원하는게 있으니 나중에 변경하기
-    @TestDescription("정상적으로 이벤트를 생성하는 코드")
+    @DisplayName("정상적으로 이벤트를 생성하는 코드")
     public void createEvent() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("hh-jang")
@@ -157,7 +157,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("입력받을 수 없는 값을 사용한 경우 400 에러가 발생하는 코드")
+    @DisplayName("입력받을 수 없는 값을 사용한 경우 400 에러가 발생하는 코드")
     public void createEvent_Bad_Request() throws Exception {
         Event event = Event.builder()
                 .id(100)
@@ -186,7 +186,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("입력값이 비어있는 경우 에러가 발생하는 테스트")
+    @DisplayName("입력값이 비어있는 경우 에러가 발생하는 테스트")
     public void createEvent_BadRequest_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().
                 build();
@@ -201,7 +201,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("입력값이 잘못되었을 경우 발생하는 테스트")
+    @DisplayName("입력값이 잘못되었을 경우 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto event = EventDto.builder()
                 .name("hh-jang")
@@ -231,7 +231,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("30개의 이벤트를 10개씩 2번째 페이지 조회하기")
+    @DisplayName("30개의 이벤트를 10개씩 2번째 페이지 조회하기")
     public void getEvents() throws Exception {
         // Given
         IntStream.range(0, 30).forEach(this::generateEvent);
@@ -295,7 +295,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("이벤트 1개를 조회한다")
+    @DisplayName("이벤트 1개를 조회한다")
     public void getEvent() throws Exception {
         // Given
         Account account = createAccount();
@@ -314,7 +314,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("존재하지 않는 이벤트 조회 시 404 응답")
+    @DisplayName("존재하지 않는 이벤트 조회 시 404 응답")
     public void getEvent_NotFound() throws Exception {
         // Given
         int notExistId = 123123;
@@ -333,7 +333,7 @@ public class EventControllerTest extends MockMvcTest {
     // 3. 존재하는 이벤트를 수정 시 값이 비어있을 경우 실패
     // 4. 존재하지 않는 이벤트 수정 에러
     @Test
-    @TestDescription("이벤트가 존재할 때에 수정을 성공하는 테스트")
+    @DisplayName("이벤트가 존재할 때에 수정을 성공하는 테스트")
     public void updateEvent() throws Exception {
         // Given
         Account account = createAccount();
@@ -364,7 +364,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("이벤트가 존재할때에 잘못된 수정 내용일 때에 badRequest")
+    @DisplayName("이벤트가 존재할때에 잘못된 수정 내용일 때에 badRequest")
     public void updateEvent_Bad_Request_Wrong_Input() throws Exception {
         // Given
         Event generatedEvent = generateEvent(1);
@@ -388,7 +388,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("이벤트가 존재할때에 비어있는 값을 보낼 경우 badRequest")
+    @DisplayName("이벤트가 존재할때에 비어있는 값을 보낼 경우 badRequest")
     public void updateEvent_Bad_Request_Empty_Input() throws Exception {
         // Given
         Event generatedEvent = generateEvent(1);
@@ -406,7 +406,7 @@ public class EventControllerTest extends MockMvcTest {
     }
 
     @Test
-    @TestDescription("존재하지 않는 이벤트 수정 시 404")
+    @DisplayName("존재하지 않는 이벤트 수정 시 404")
     public void updateEvent_Not_Found() throws Exception {
         // Given
         int notExistId = 123123;

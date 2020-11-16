@@ -3,7 +3,7 @@ package com.hhjang.restapidemo.config;
 import com.hhjang.restapidemo.MockMvcTest;
 import com.hhjang.restapidemo.accounts.AccountService;
 import com.hhjang.restapidemo.common.AppProperties;
-import com.hhjang.restapidemo.common.TestDescription;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,7 +22,7 @@ public class AuthServerConfigTest extends MockMvcTest {
     AppProperties appProperties;
 
     @Test
-    @TestDescription("인증 토큰을 발급받는 테스트")
+    @DisplayName("인증 토큰을 발급받는 코드")
     public void getAuthToken() throws Exception {
         this.mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))

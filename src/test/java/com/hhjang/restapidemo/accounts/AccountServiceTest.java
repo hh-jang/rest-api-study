@@ -1,25 +1,20 @@
 package com.hhjang.restapidemo.accounts;
 
+import com.hhjang.restapidemo.MockMvcTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
-public class AccountServiceTest {
+public class AccountServiceTest extends MockMvcTest {
 
     @Autowired
     AccountService service;
@@ -28,6 +23,7 @@ public class AccountServiceTest {
     PasswordEncoder passwordEncoder;
 
     @Test
+    @DisplayName("유저가 정상적으로 저장되는지 확인하는 코드")
     public void findByUsername() {
         // Given
         String username = "hh-jang@gmail.com";
@@ -48,7 +44,8 @@ public class AccountServiceTest {
         assertThat(this.passwordEncoder.matches(password, userDetails.getPassword())).isTrue();
     }
 
-    @Test()
+    @Test
+    @DisplayName("존재하지 않는 유저를 검색 시 UsernameNotFoundException 발생을 확인하는 코드")
     public void findByUsernameFail() {
         // Given
         String notExistUsername = "notExistUsername@gmail.com";
