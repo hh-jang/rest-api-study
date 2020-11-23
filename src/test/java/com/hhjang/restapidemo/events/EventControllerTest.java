@@ -29,6 +29,8 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -234,11 +236,12 @@ public class EventControllerTest extends MockMvcTest {
     @DisplayName("30개의 이벤트를 10개씩 2번째 페이지 조회하기")
     public void getEvents() throws Exception {
         // Given
-        IntStream.range(0, 30).forEach(this::generateEvent);
+        Account account = createAccount();
+        IntStream.range(0, 30).forEach(i -> generateEvent(i, account));
 
         // When
         mockMvc.perform(get("/api/events/")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken(true))
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken(false))
                 .param("page", "1")
                 .param("size", "10")
                 .param("sort", "name,DESC")
@@ -250,8 +253,56 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.create-event").exists())
-                .andDo(document("query-events"))
-        // TODO Add Document Description
+                .andDo(document("query-events",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("profile").description("link to profile an existing event"),
+                                linkWithRel("first").description("link to first page of events"),
+                                linkWithRel("prev").description("link to previous page of events"),
+                                linkWithRel("next").description("link to next page of events"),
+                                linkWithRel("last").description("link to last page of events"),
+                                linkWithRel("create-event").description("link to create event")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("page number of events"),
+                                parameterWithName("size").description("size of page(offset)"),
+                                parameterWithName("sort").description("sort arguments")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ),
+                        responseFields(
+                                fieldWithPath("_embedded.eventList[].id").description("id of event"),
+                                fieldWithPath("_embedded.eventList[].name").description("name of event"),
+                                fieldWithPath("_embedded.eventList[].description").description("description of event"),
+                                fieldWithPath("_embedded.eventList[].beginEnrollmentDateTime").description("datetime of begin of event"),
+                                fieldWithPath("_embedded.eventList[].closeEnrollmentDateTime").description("datetime of close of event"),
+                                fieldWithPath("_embedded.eventList[].beginEventDateTime").description("datetime of begin of event"),
+                                fieldWithPath("_embedded.eventList[].closeEventDateTime").description("datetime of close of event"),
+                                fieldWithPath("_embedded.eventList[].location").description("location of event"),
+                                fieldWithPath("_embedded.eventList[].basePrice").description("base price of event"),
+                                fieldWithPath("_embedded.eventList[].maxPrice").description("max price of event"),
+                                fieldWithPath("_embedded.eventList[].limitOfEnrollment").description("limit of event"),
+                                fieldWithPath("_embedded.eventList[].offline").description("offline of event"),
+                                fieldWithPath("_embedded.eventList[].free").description("free of event"),
+                                fieldWithPath("_embedded.eventList[].eventStatus").description("event status of event"),
+                                fieldWithPath("_embedded.eventList[].manager.id").description("account's id of event"),
+                                fieldWithPath("_embedded.eventList[]._links.self.href").description("self href of events"),
+                                fieldWithPath("page.size").description("size of event page"),
+                                fieldWithPath("page.totalElements").description("number of total elements"),
+                                fieldWithPath("page.totalPages").description("number of total pages"),
+                                fieldWithPath("page.number").description("current page number"),
+
+                                // optional -
+                                fieldWithPath("_links.self.href").description("link to self").optional(),
+                                fieldWithPath("_links.profile.href").description("link to profile an existing event").optional(),
+                                fieldWithPath("_links.first.href").description("link to first page of events").optional(),
+                                fieldWithPath("_links.prev.href").description("link to previous page of events").optional(),
+                                fieldWithPath("_links.next.href").description("link to next page of events").optional(),
+                                fieldWithPath("_links.last.href").description("link to last page of events").optional(),
+                                fieldWithPath("_links.create-event.href").description("link to create event").optional()
+                        )
+                ))
         ;
     }
 
@@ -357,7 +408,6 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("id").value(generatedEvent.getId()))
                 .andExpect(jsonPath("name").value("modified hh-jang"))
                 .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
                 .andExpect(jsonPath("_links.profile").exists())
         ;
