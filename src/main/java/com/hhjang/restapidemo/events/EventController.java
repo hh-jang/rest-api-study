@@ -64,7 +64,7 @@ public class EventController {
         URI createdUri = linkBuilder.toUri();
 
         EntityModel<Event> resource = EntityModel.of(savedEvent);
-        resource.add(linkTo(EventController.class).withRel("query-events"));
+        resource.add(linkTo(EventController.class).withRel("get-events"));
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
         // TODO gradle 기반으로 구성하기

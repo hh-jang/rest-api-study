@@ -28,11 +28,10 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -93,14 +92,14 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("free").value(not(true)))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
                 .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.get-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andDo(document("create-event",     // Document 생성
                         links(
                                 // 링크 정보를 문서조각에 추가
                                 linkWithRel("self").description("link to self"),
-                                linkWithRel("query-events").description("link to query events"),
+                                linkWithRel("get-events").description("link to query events"),
                                 linkWithRel("update-event").description("link to update an existing event"),
                                 linkWithRel("profile").description("link to profile an existing event")
                         ),
@@ -146,7 +145,7 @@ public class EventControllerTest extends MockMvcTest {
 
                                 // optional -
                                 fieldWithPath("_links.self.href").description("self href of new event").optional(),
-                                fieldWithPath("_links.query-events.href").description("query events href of new event").optional(),
+                                fieldWithPath("_links.get-events.href").description("query events href of new event").optional(),
                                 fieldWithPath("_links.update-event.href").description("update event href of new event").optional(),
                                 fieldWithPath("_links.profile.href").description("profile event href of new event").optional()
                         )
@@ -253,7 +252,7 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.create-event").exists())
-                .andDo(document("query-events",
+                .andDo(document("get-events",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("profile").description("link to profile an existing event"),
@@ -360,7 +359,40 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("name").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
-        // TODO Add Document
+                .andDo(document("get-event",     // Document 생성
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("profile").description("link to profile an existing event"),
+                                linkWithRel("update-event").description("if authenticated user, provide update link").optional()
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("id of event")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("id of event"),
+                                fieldWithPath("name").description("name of event"),
+                                fieldWithPath("description").description("description of event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("datetime of close of event"),
+                                fieldWithPath("beginEventDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEventDateTime").description("datetime of close of event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("base price of event"),
+                                fieldWithPath("maxPrice").description("max price of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of event"),
+                                fieldWithPath("offline").description("offline of event"),
+                                fieldWithPath("free").description("free of event"),
+                                fieldWithPath("eventStatus").description("event status of event"),
+                                fieldWithPath("manager.id").description("account's id of event"),
+
+                                // optional -
+                                fieldWithPath("_links.self.href").description("self href of event").optional(),
+                                fieldWithPath("_links.profile.href").description("profile event href of event").optional()
+                        )
+                ))
         ;
     }
 
