@@ -198,7 +198,22 @@ public class EventControllerTest extends MockMvcTest {
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsBytes(eventDto)))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andDo(document("errors",
+                        links(
+                                linkWithRel("index").description("link to index page")
+                        ),
+                        responseFields(
+                                fieldWithPath("content[].fieldName").description("error field name"),
+                                fieldWithPath("content[].objectName").description("error object name"),
+                                fieldWithPath("content[].code").description("error code"),
+                                fieldWithPath("content[].defaultMessage").description("error default message"),
+
+                                // optional
+                                fieldWithPath("_links.index.href").description("link to index page").optional()
+                        )
+                ))
+        ;
     }
 
     @Test
@@ -228,7 +243,23 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("content[0].defaultMessage").exists())
                 .andExpect(jsonPath("content[0].code").exists())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("_links.index").exists());
+                .andExpect(jsonPath("_links.index").exists())
+                .andDo(document("errors",
+                    links(
+                            linkWithRel("index").description("link to index page")
+                    ),
+                    responseFields(
+                            fieldWithPath("content[].fieldName").description("error field name").optional(),
+                            fieldWithPath("content[].objectName").description("error object name").optional(),
+                            fieldWithPath("content[].code").description("error code").optional(),
+                            fieldWithPath("content[].defaultMessage").description("error default message").optional(),
+                            fieldWithPath("content[].rejectedValue").description("error value of field").optional(),
+
+                            // optional
+                            fieldWithPath("_links.index.href").description("link to index page").optional()
+                    )
+                ))
+        ;
     }
 
     @Test
@@ -406,7 +437,6 @@ public class EventControllerTest extends MockMvcTest {
         this.mockMvc.perform(get("/api/events/{id}", String.valueOf(notExistId)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-        // TODO Add Document
         ;
     }
 
@@ -519,6 +549,21 @@ public class EventControllerTest extends MockMvcTest {
                 .content(objectMapper.writeValueAsBytes(modifiedDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andDo(document("errors",
+                        links(
+                                linkWithRel("index").description("link to index page")
+                        ),
+                        responseFields(
+                                fieldWithPath("content[].fieldName").description("error field name").optional(),
+                                fieldWithPath("content[].objectName").description("error object name").optional(),
+                                fieldWithPath("content[].code").description("error code").optional(),
+                                fieldWithPath("content[].defaultMessage").description("error default message").optional(),
+                                fieldWithPath("content[].rejectedValue").description("error value of field").optional(),
+
+                                // optional
+                                fieldWithPath("_links.index.href").description("link to index page").optional()
+                        )
+                ))
         ;
     }
 
