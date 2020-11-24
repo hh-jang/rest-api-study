@@ -442,7 +442,7 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
                 .andExpect(jsonPath("_links.profile").exists())
-                .andDo(document("events-update",     // Document 생성
+                .andDo(document("update-event",     // Document 생성
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("profile").description("link to profile an existing event"),
