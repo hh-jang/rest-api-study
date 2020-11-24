@@ -442,6 +442,59 @@ public class EventControllerTest extends MockMvcTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
                 .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("events-update",     // Document 생성
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("profile").description("link to profile an existing event"),
+                                linkWithRel("update-event").description("link to update event")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("Content-Type of request header"),
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authenticated user's token"),
+                                headerWithName(HttpHeaders.ACCEPT).description("Accept of request header")
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description("name of event"),
+                                fieldWithPath("description").description("description of event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("datetime of close of event"),
+                                fieldWithPath("beginEventDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEventDateTime").description("datetime of close of event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("base price of event"),
+                                fieldWithPath("maxPrice").description("max price of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of event")
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("id of event")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION).description("location header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("id of event"),
+                                fieldWithPath("name").description("name of event"),
+                                fieldWithPath("description").description("description of event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("datetime of close of event"),
+                                fieldWithPath("beginEventDateTime").description("datetime of begin of event"),
+                                fieldWithPath("closeEventDateTime").description("datetime of close of event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("base price of event"),
+                                fieldWithPath("maxPrice").description("max price of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of event"),
+                                fieldWithPath("offline").description("offline of event"),
+                                fieldWithPath("free").description("free of event"),
+                                fieldWithPath("eventStatus").description("event status of event"),
+                                fieldWithPath("manager.id").description("account's id of event"),
+
+                                // optional -
+                                fieldWithPath("_links.self.href").description("self href of event").optional(),
+                                fieldWithPath("_links.update-event.href").description("link to update event").optional(),
+                                fieldWithPath("_links.profile.href").description("profile event href of event").optional()
+                        )
+                ))
         ;
     }
 
