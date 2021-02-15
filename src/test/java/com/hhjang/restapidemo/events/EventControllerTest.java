@@ -65,7 +65,7 @@ public class EventControllerTest extends MockMvcTest {
     // junit5에서 관련 기능 지원하는게 있으니 나중에 변경하기
     @DisplayName("정상적으로 이벤트를 생성하는 코드")
     public void createEvent() throws Exception {
-        EventDto eventDto = EventDto.builder()
+        EventDto.Request eventDto = EventDto.Request.builder()
                 .name("hh-jang")
                 .description("테스트 데이터")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 21, 11, 11))
@@ -191,7 +191,7 @@ public class EventControllerTest extends MockMvcTest {
     @Test
     @DisplayName("입력값이 비어있는 경우 에러가 발생하는 테스트")
     public void createEvent_BadRequest_Empty_Input() throws Exception {
-        EventDto eventDto = EventDto.builder().
+        EventDto.Request eventDto = EventDto.Request.builder().
                 build();
 
         mockMvc.perform(post("/api/events/")
@@ -221,7 +221,7 @@ public class EventControllerTest extends MockMvcTest {
     @Test
     @DisplayName("입력값이 잘못되었을 경우 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
-        EventDto event = EventDto.builder()
+        EventDto.Request event = EventDto.Request.builder()
                 .name("hh-jang")
                 .description("테스트 데이터")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
@@ -459,8 +459,18 @@ public class EventControllerTest extends MockMvcTest {
         Event generatedEvent = generateEvent(1, account);
         String modifiedName = "modified hh-jang";
 
-        EventDto modifiedDto = modelMapper.map(generatedEvent, EventDto.class);
-        modifiedDto.setName(modifiedName);
+        EventDto.Request modifiedDto = EventDto.Request.builder()
+                .name(modifiedName)
+                .description(generatedEvent.getDescription())
+                .beginEnrollmentDateTime(generatedEvent.getBeginEnrollmentDateTime())
+                .closeEnrollmentDateTime(generatedEvent.getCloseEnrollmentDateTime())
+                .beginEventDateTime(generatedEvent.getBeginEventDateTime())
+                .closeEventDateTime(generatedEvent.getCloseEventDateTime())
+                .basePrice(generatedEvent.getBasePrice())
+                .maxPrice(generatedEvent.getMaxPrice())
+                .limitOfEnrollment(generatedEvent.getLimitOfEnrollment())
+                .location(generatedEvent.getLocation())
+                .build();
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
@@ -543,18 +553,26 @@ public class EventControllerTest extends MockMvcTest {
         Event generatedEvent = generateEvent(1);
         String modifiedName = "modified hh-jang";
 
-        EventDto modifiedDto = modelMapper.map(generatedEvent, EventDto.class);
-        modifiedDto.setBeginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11));
-        modifiedDto.setCloseEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11));
-        modifiedDto.setBeginEventDateTime(LocalDateTime.of(2020, 9, 24, 11, 11));
-        modifiedDto.setCloseEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11));
+
+        EventDto.Request modifiedRequest = EventDto.Request.builder()
+                .name(generatedEvent.getName())
+                .description(generatedEvent.getDescription())
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 9, 22, 11, 11))
+                .beginEventDateTime(LocalDateTime.of(2020, 9, 24, 11, 11))
+                .closeEventDateTime(LocalDateTime.of(2020, 9, 23, 11, 11))
+                .basePrice(generatedEvent.getBasePrice())
+                .maxPrice(generatedEvent.getMaxPrice())
+                .limitOfEnrollment(generatedEvent.getLimitOfEnrollment())
+                .location(generatedEvent.getLocation())
+                .build();
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
                 .header(HttpHeaders.AUTHORIZATION, getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsBytes(modifiedDto)))
+                .content(objectMapper.writeValueAsBytes(modifiedRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andDo(document("errors",
@@ -580,7 +598,7 @@ public class EventControllerTest extends MockMvcTest {
     public void updateEvent_Bad_Request_Empty_Input() throws Exception {
         // Given
         Event generatedEvent = generateEvent(1);
-        EventDto modifiedDto = EventDto.builder().build();
+        EventDto.Request modifiedDto = EventDto.Request.builder().build();
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", generatedEvent.getId())
@@ -598,7 +616,7 @@ public class EventControllerTest extends MockMvcTest {
     public void updateEvent_Not_Found() throws Exception {
         // Given
         int notExistId = 123123;
-        EventDto eventDto = EventDto.builder().build();
+        EventDto.Request eventDto = EventDto.Request.builder().build();
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", notExistId)

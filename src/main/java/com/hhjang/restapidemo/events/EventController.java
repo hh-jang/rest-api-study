@@ -1,21 +1,19 @@
 package com.hhjang.restapidemo.events;
 
 import com.hhjang.restapidemo.accounts.Account;
-import com.hhjang.restapidemo.accounts.AccountAdapter;
 import com.hhjang.restapidemo.accounts.CurrentUser;
 import com.hhjang.restapidemo.index.IndexController;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +40,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid EventDto eventDto,
+    public ResponseEntity create(@RequestBody @Valid EventDto.Request eventDto,
                                  Errors errors,
 //                                 @AuthenticationPrincipal AccountAdapter currentUser
                                  @CurrentUser Account user
@@ -59,11 +57,12 @@ public class EventController {
         event.statusUpdate();
         event.setManager(user);
         Event savedEvent = this.eventRepository.save(event);
+        EventDto.Response eventResponse = EventDto.Response.of(savedEvent);
 
-        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(savedEvent.getId());
+        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(eventResponse.getId());
         URI createdUri = linkBuilder.toUri();
 
-        EntityModel<Event> resource = EntityModel.of(savedEvent);
+        EntityModel<EventDto.Response> resource = EntityModel.of(eventResponse);
         resource.add(linkTo(EventController.class).withRel("get-events"));
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
@@ -77,7 +76,8 @@ public class EventController {
                                       PagedResourcesAssembler<Event> resourcesAssembler,
                                       @CurrentUser Account user) {
         Page<Event> page = this.eventRepository.findAll(pageable);
-        PagedModel<EntityModel<Event>> entityModels = resourcesAssembler.toModel(page, entity -> EventEntityModel.of(entity));
+        PagedModel<EntityModel<EventDto.Response>> entityModels = resourcesAssembler.toModel(
+                page, entity -> EventEntityModel.of(EventDto.Response.of(entity)));
         entityModels.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
         if(user != null) {
             entityModels.add(linkTo(EventController.class).withRel("create-event"));
@@ -91,9 +91,10 @@ public class EventController {
         Optional<Event> optionalEvent = eventRepository.findById(id);
         if(optionalEvent.isEmpty()) return ResponseEntity.notFound().build();
         Event event = optionalEvent.get();
-        EntityModel<Event> profile = EventEntityModel.of(event, Link.of("docs/index.html#resources-events-get").withRel("profile"));
+        EventDto.Response eventResponse = EventDto.Response.of(event);
+        EntityModel<EventDto.Response> profile = EventEntityModel.of(eventResponse, Link.of("docs/index.html#resources-events-get").withRel("profile"));
         if(user != null) {
-            profile.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+            profile.add(linkTo(EventController.class).slash(eventResponse.getId()).withRel("update-event"));
         }
 
         return ResponseEntity.ok(profile);
@@ -106,7 +107,7 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity update(@PathVariable Integer id,
-                                 @RequestBody @Valid EventDto eventDto,
+                                 @RequestBody @Valid EventDto.Request eventDto,
                                  Errors errors,
                                  @CurrentUser Account user) {
         Optional<Event> eventOptional = this.eventRepository.findById(id);
@@ -127,11 +128,12 @@ public class EventController {
 
         this.modelMapper.map(eventDto, savedEvent);
         Event updatedEvent = this.eventRepository.save(savedEvent);
+        EventDto.Response updatedEventDto = EventDto.Response.of(updatedEvent);
 
-        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(updatedEvent.getId());
+        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(updatedEventDto.getId());
         URI createdUri = linkBuilder.toUri();
 
-        EntityModel<Event> resource = EntityModel.of(updatedEvent);
+        EntityModel<EventDto.Response> resource = EntityModel.of(updatedEventDto);
         resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
         // TODO gradle 기반으로 구성하기

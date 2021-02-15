@@ -37,7 +37,6 @@ public class Event {
     @Enumerated(value = EnumType.STRING) @Builder.Default
     private EventStatus eventStatus = EventStatus.DRAFT;
     @ManyToOne
-    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
 
     public void statusUpdate() {
