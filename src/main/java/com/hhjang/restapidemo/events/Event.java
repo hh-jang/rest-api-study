@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hhjang.restapidemo.accounts.Account;
 import com.hhjang.restapidemo.accounts.AccountSerializer;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,6 +18,12 @@ public class Event {
     private Integer id;
     private String name;
     private String description;
+
+    @CreationTimestamp
+    private LocalDateTime createdDateTime;
+    @UpdateTimestamp
+    private LocalDateTime updatedDateTime;
+
     private LocalDateTime beginEnrollmentDateTime;
     private LocalDateTime closeEnrollmentDateTime;
     private LocalDateTime beginEventDateTime;
