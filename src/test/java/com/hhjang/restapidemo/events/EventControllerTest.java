@@ -281,7 +281,7 @@ public class EventControllerTest extends MockMvcTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
-                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.events[0]._links.self").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.create-event").exists())
@@ -304,24 +304,24 @@ public class EventControllerTest extends MockMvcTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
                         ),
                         responseFields(
-                                fieldWithPath("_embedded.eventList[].id").description("id of event"),
-                                fieldWithPath("_embedded.eventList[].name").description("name of event"),
-                                fieldWithPath("_embedded.eventList[].description").description("description of event"),
-                                fieldWithPath("_embedded.eventList[].createdDateTime").description("datetime of created of event"),
-                                fieldWithPath("_embedded.eventList[].updatedDateTime").description("datetime of updated of event"),
-                                fieldWithPath("_embedded.eventList[].beginEnrollmentDateTime").description("datetime of begin of event"),
-                                fieldWithPath("_embedded.eventList[].closeEnrollmentDateTime").description("datetime of close of event"),
-                                fieldWithPath("_embedded.eventList[].beginEventDateTime").description("datetime of begin of event"),
-                                fieldWithPath("_embedded.eventList[].closeEventDateTime").description("datetime of close of event"),
-                                fieldWithPath("_embedded.eventList[].location").description("location of event"),
-                                fieldWithPath("_embedded.eventList[].basePrice").description("base price of event"),
-                                fieldWithPath("_embedded.eventList[].maxPrice").description("max price of event"),
-                                fieldWithPath("_embedded.eventList[].limitOfEnrollment").description("limit of event"),
-                                fieldWithPath("_embedded.eventList[].offline").description("offline of event"),
-                                fieldWithPath("_embedded.eventList[].free").description("free of event"),
-                                fieldWithPath("_embedded.eventList[].eventStatus").description("event status of event"),
-                                fieldWithPath("_embedded.eventList[].manager.id").description("account's id of event"),
-                                fieldWithPath("_embedded.eventList[]._links.self.href").description("self href of events"),
+                                fieldWithPath("_embedded.events[].id").description("id of event"),
+                                fieldWithPath("_embedded.events[].name").description("name of event"),
+                                fieldWithPath("_embedded.events[].description").description("description of event"),
+                                fieldWithPath("_embedded.events[].createdDateTime").description("datetime of created of event"),
+                                fieldWithPath("_embedded.events[].updatedDateTime").description("datetime of updated of event"),
+                                fieldWithPath("_embedded.events[].beginEnrollmentDateTime").description("datetime of begin of event"),
+                                fieldWithPath("_embedded.events[].closeEnrollmentDateTime").description("datetime of close of event"),
+                                fieldWithPath("_embedded.events[].beginEventDateTime").description("datetime of begin of event"),
+                                fieldWithPath("_embedded.events[].closeEventDateTime").description("datetime of close of event"),
+                                fieldWithPath("_embedded.events[].location").description("location of event"),
+                                fieldWithPath("_embedded.events[].basePrice").description("base price of event"),
+                                fieldWithPath("_embedded.events[].maxPrice").description("max price of event"),
+                                fieldWithPath("_embedded.events[].limitOfEnrollment").description("limit of event"),
+                                fieldWithPath("_embedded.events[].offline").description("offline of event"),
+                                fieldWithPath("_embedded.events[].free").description("free of event"),
+                                fieldWithPath("_embedded.events[].eventStatus").description("event status of event"),
+                                fieldWithPath("_embedded.events[].manager.id").description("account's id of event"),
+                                fieldWithPath("_embedded.events[]._links.self.href").description("self href of events"),
                                 fieldWithPath("page.size").description("size of event page"),
                                 fieldWithPath("page.totalElements").description("number of total elements"),
                                 fieldWithPath("page.totalPages").description("number of total pages"),

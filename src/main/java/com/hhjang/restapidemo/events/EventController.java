@@ -32,11 +32,13 @@ public class EventController {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
     private final EventValidator validator;
+    private final EventModelAssembler assembler;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator, EventModelAssembler assembler) {
         this.eventRepository = eventRepository;
         this.modelMapper = modelMapper;
         this.validator = validator;
+        this.assembler = assembler;
     }
 
     @PostMapping
@@ -57,14 +59,12 @@ public class EventController {
         event.statusUpdate();
         event.setManager(user);
         Event savedEvent = this.eventRepository.save(event);
-        EventDto.Response eventResponse = EventDto.Response.of(savedEvent);
+        EventDto.Response resource = assembler.toModel(savedEvent);
 
-        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(eventResponse.getId());
+        WebMvcLinkBuilder linkBuilder = linkTo(Event.class).slash(resource.getId());
         URI createdUri = linkBuilder.toUri();
 
-        EntityModel<EventDto.Response> resource = EntityModel.of(eventResponse);
         resource.add(linkTo(EventController.class).withRel("get-events"));
-        resource.add(linkBuilder.withSelfRel());
         resource.add(linkBuilder.withRel("update-event"));
         // TODO gradle 기반으로 구성하기
         resource.add(Link.of("docs/index.html#resources-events-list").withRel("profile"));
@@ -73,16 +73,15 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable,
-                                      PagedResourcesAssembler<Event> resourcesAssembler,
+                                      PagedResourcesAssembler<Event> pagedResourcesAssembler,
                                       @CurrentUser Account user) {
         Page<Event> page = this.eventRepository.findAll(pageable);
-        PagedModel<EntityModel<EventDto.Response>> entityModels = resourcesAssembler.toModel(
-                page, entity -> EventEntityModel.of(EventDto.Response.of(entity)));
-        entityModels.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
+        PagedModel<EventDto.Response> responses = pagedResourcesAssembler.toModel(page, assembler);
+        responses.add(Link.of("docs/index.html#resources-events-create").withRel("profile"));
         if(user != null) {
-            entityModels.add(linkTo(EventController.class).withRel("create-event"));
+            responses.add(linkTo(EventController.class).withRel("create-event"));
         }
-        return ResponseEntity.ok(entityModels);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
@@ -91,13 +90,13 @@ public class EventController {
         Optional<Event> optionalEvent = eventRepository.findById(id);
         if(optionalEvent.isEmpty()) return ResponseEntity.notFound().build();
         Event event = optionalEvent.get();
-        EventDto.Response eventResponse = EventDto.Response.of(event);
-        EntityModel<EventDto.Response> profile = EventEntityModel.of(eventResponse, Link.of("docs/index.html#resources-events-get").withRel("profile"));
+        EventDto.Response response = assembler.toModel(event);
+        response.add(Link.of("docs/index.html#resources-events-get").withRel("profile"));
         if(user != null) {
-            profile.add(linkTo(EventController.class).slash(eventResponse.getId()).withRel("update-event"));
+            response.add(linkTo(EventController.class).slash(response.getId()).withRel("update-event"));
         }
 
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(response);
     }
 
     private ResponseEntity badRequest(Errors errors) {

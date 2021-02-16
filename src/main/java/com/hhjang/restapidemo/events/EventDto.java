@@ -7,12 +7,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -61,7 +58,8 @@ public class EventDto {
     }
 
     @Getter
-    public static class Response {
+    @Relation(itemRelation = "event", collectionRelation = "events")
+    public static class Response extends RepresentationModel<EventDto.Response> {
         private Integer id;
         private String name;
         private String description;
