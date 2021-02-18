@@ -27,9 +27,10 @@ public class EventTest {
         String description = "me";
 
         // When
-        Event event = new Event();
-        event.setName(name);
-        event.setDescription(description);
+        Event event = Event.builder()
+                .name(name)
+                .description(description)
+                .build();
 
         // Then
         assertThat(event.getName()).isEqualTo(name);

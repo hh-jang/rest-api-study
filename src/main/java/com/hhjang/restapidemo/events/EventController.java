@@ -55,9 +55,7 @@ public class EventController {
             return badRequest(errors);
         }
 
-        Event event = modelMapper.map(eventDto, Event.class);
-        event.statusUpdate();
-        event.setManager(user);
+        Event event = toEntity(eventDto, user);
         Event savedEvent = this.eventRepository.save(event);
         EventDto.Response resource = assembler.toModel(savedEvent);
 
@@ -69,6 +67,25 @@ public class EventController {
         // TODO gradle 기반으로 구성하기
         resource.add(Link.of("docs/index.html#resources-events-list").withRel("profile"));
         return ResponseEntity.created(createdUri).body(resource);
+    }
+
+    private Event toEntity(EventDto.Request requestDto, Account account) {
+        Event event = Event.builder()
+                .name(requestDto.getName())
+                .description(requestDto.getDescription())
+                .beginEnrollmentDateTime(requestDto.getBeginEnrollmentDateTime())
+                .closeEnrollmentDateTime(requestDto.getCloseEnrollmentDateTime())
+                .beginEventDateTime(requestDto.getBeginEventDateTime())
+                .closeEventDateTime(requestDto.getCloseEventDateTime())
+                .basePrice(requestDto.getBasePrice())
+                .maxPrice(requestDto.getMaxPrice())
+                .limitOfEnrollment(requestDto.getLimitOfEnrollment())
+                .location(requestDto.getLocation())
+                .manager(account)
+                .build();
+        event.statusUpdate();
+
+        return event;
     }
 
     @GetMapping
@@ -125,7 +142,7 @@ public class EventController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 
-        this.modelMapper.map(eventDto, savedEvent);
+        savedEvent.update(eventDto);
         Event updatedEvent = this.eventRepository.save(savedEvent);
         EventDto.Response updatedEventDto = EventDto.Response.of(updatedEvent);
 

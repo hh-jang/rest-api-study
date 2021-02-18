@@ -1,8 +1,6 @@
 package com.hhjang.restapidemo.events;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hhjang.restapidemo.accounts.Account;
-import com.hhjang.restapidemo.accounts.AccountSerializer;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,7 +9,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Builder @AllArgsConstructor @NoArgsConstructor
-@Getter @Setter @EqualsAndHashCode(of = "id")
+@Getter @EqualsAndHashCode(of = "id")
 @Entity
 public class Event {
     @Id @GeneratedValue
@@ -52,5 +50,20 @@ public class Event {
         } else {
             this.offline = true;
         }
+    }
+
+    public void update(EventDto.Request dto) {
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.beginEnrollmentDateTime = dto.getBeginEnrollmentDateTime();
+        this.closeEnrollmentDateTime = dto.getCloseEnrollmentDateTime();
+        this.beginEventDateTime = dto.getBeginEventDateTime();
+        this.closeEventDateTime = dto.getCloseEventDateTime();
+        this.location = dto.getLocation();
+        this.basePrice = dto.getBasePrice();
+        this.maxPrice = dto.getMaxPrice();
+        this.limitOfEnrollment = dto.getLimitOfEnrollment();
+
+        statusUpdate();
     }
 }
