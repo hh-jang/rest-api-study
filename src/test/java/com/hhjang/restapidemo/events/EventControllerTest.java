@@ -11,7 +11,6 @@ import com.hhjang.restapidemo.common.AppProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -39,9 +38,6 @@ public class EventControllerTest extends MockMvcTest {
 
     @Autowired
     ObjectMapper objectMapper;
-
-    @Autowired
-    ModelMapper modelMapper;
 
     @Autowired
     EventRepository eventRepository;

@@ -3,7 +3,6 @@ package com.hhjang.restapidemo.events;
 import com.hhjang.restapidemo.accounts.Account;
 import com.hhjang.restapidemo.accounts.CurrentUser;
 import com.hhjang.restapidemo.index.IndexController;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -30,13 +29,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class EventController {
 
     private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
     private final EventValidator validator;
     private final EventModelAssembler assembler;
 
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator validator, EventModelAssembler assembler) {
+    public EventController(EventRepository eventRepository, EventValidator validator, EventModelAssembler assembler) {
         this.eventRepository = eventRepository;
-        this.modelMapper = modelMapper;
         this.validator = validator;
         this.assembler = assembler;
     }

@@ -4,7 +4,6 @@ import com.hhjang.restapidemo.accounts.Account;
 import com.hhjang.restapidemo.accounts.AccountRole;
 import com.hhjang.restapidemo.accounts.AccountService;
 import com.hhjang.restapidemo.common.AppProperties;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -17,11 +16,6 @@ import java.util.Set;
 
 @Configuration
 public class AppConfig {
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
