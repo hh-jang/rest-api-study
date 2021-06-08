@@ -126,3 +126,9 @@ operation::get-event[snippets='curl-request,http-response,links']
 `PUT` 요청을 사용해서 기존 이벤트를 수정할 수 있다.
 
 operation::update-event[snippets='request-fields,curl-request,http-response,links']
+
+=== Pojo 생성
+
+`POST` 요청을 사용해서 새 Pojo를 만들 수 있다.
+
+operation::create-pojo[snippets='request-fields,curl-request,http-request,request-headers,http-response,response-headers,response-fields,response-fields-pojo']
